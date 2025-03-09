@@ -7,6 +7,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -28,13 +30,34 @@ public class LogViewerResource {
             path = "/";
         }
         File root = new File(path);
-        File[] files = root.listFiles();
+        if (!root.exists() || !root.isDirectory()) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Directory not found").build();
+        }
         List<FileInfo> fileInfos = new ArrayList<>();
+        if (StringUtils.isNotEmpty(root.getParent()) && !root.isHidden()) {
+            fileInfos.add(FileInfo.builder()
+                    .name("..")
+                    .size(0)
+                    .lastModified(new Date(root.lastModified()))
+                    .isDirectory(true)
+                    .absolutePath(root.getParent())
+                    .path(root.getParent())
+                    .parent(root.getParent())
+                    .build());
+        }
+        File[] files = root.listFiles();
         if (files != null) {
             for (File file : files) {
-                FileInfo fileInfo = new FileInfo(file.getName(), file.length(), new Date(file.lastModified()),
-                        file.isDirectory());
-                fileInfos.add(fileInfo);
+                if(file.isHidden()) continue;
+                fileInfos.add(FileInfo.builder()
+                    .name(file.getName())
+                    .size(file.length())
+                    .lastModified(new Date(file.lastModified()))
+                    .isDirectory(file.isDirectory())
+                    .absolutePath(file.getAbsolutePath())
+                    .path(file.getPath())
+                    .parent(file.getParent())
+                    .build());
             }
         }
         return Response.ok(fileInfos).build();
@@ -108,6 +131,6 @@ public class LogViewerResource {
                     break;
             }
         }
-        return StandardCharsets.UTF_8; // 기본 인코딩 설정을 UTF-8로 설정
+        return StandardCharsets.UTF_8;
     }
 }
