@@ -1,0 +1,5 @@
+/.vscode/
+/.idea/
+/target/
+
+/svelte-app/node_modules/

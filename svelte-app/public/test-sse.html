@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SSE Test</title>
+</head>
+<body>
+    <h1>SSE Test</h1>
+    <div id="log"></div>
+
+    <script>
+        const eventSource = new EventSource('http://localhost:3000/rest/log-viewer/1.0/files/stream?path=/projects/vscode/log-viewer-jira/README.MD');
+
+        eventSource.onmessage = function(event) {
+            const logDiv = document.getElementById('log');
+            const newLog = document.createElement('div');
+            newLog.textContent = event.data;
+            logDiv.appendChild(newLog);
+        };
+
+        eventSource.onerror = function(event) {
+            console.error('Error occurred:', event);
+            eventSource.close();
+        };
+    </script>
+</body>
+</html>
