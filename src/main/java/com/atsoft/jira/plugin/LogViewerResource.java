@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 @Path("/files")
 public class LogViewerResource {
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFileSystemInfo(@QueryParam("path") String path) {
@@ -31,19 +30,21 @@ public class LogViewerResource {
         }
         File root = new File(path);
         if (!root.exists() || !root.isDirectory()) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Directory not found").build();
+            return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity("Directory not found").build();
         }
         List<FileInfo> fileInfos = new ArrayList<>();
         if (StringUtils.isNotEmpty(root.getParent()) && !root.isHidden()) {
             fileInfos.add(FileInfo.builder()
-                    .name("..")
-                    .size(0)
-                    .lastModified(new Date(root.lastModified()))
-                    .isDirectory(true)
-                    .absolutePath(root.getParent())
-                    .path(root.getParent())
-                    .parent(root.getParent())
-                    .build());
+                .name("..")
+                .size(0)
+                .lastModified(new Date(root.lastModified()))
+                .isDirectory(true)
+                .absolutePath(root.getParent())
+                .path(root.getParent())
+                .parent(root.getParent())
+                .build());
         }
         File[] files = root.listFiles();
         if (files != null) {
@@ -68,11 +69,15 @@ public class LogViewerResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Response readFile(@QueryParam("path") String path, @QueryParam("lines") int lines) {
         if (path == null || path.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Path parameter is required").build();
+            return Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity("Path parameter is required").build();
         }
         File file = new File(path);
         if (!file.exists() || !file.isFile()) {
-            return Response.status(Response.Status.NOT_FOUND).entity("File not found").build();
+            return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity("File not found").build();
         }
         List<String> fileLines = new ArrayList<>();
         try {
@@ -82,11 +87,15 @@ public class LogViewerResource {
                 fileLines = stream.collect(Collectors.toList());
             }
         } catch (IOException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error reading file").build();
+            return Response
+                .status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Error reading file").build();
         }
         int start = Math.max(0, fileLines.size() - lines);
         List<String> resultLines = fileLines.subList(start, fileLines.size());
-        return Response.ok(String.join("\n", resultLines)).build();
+        return Response
+            .ok(String.join("\n", resultLines))
+            .build();
     }
 
     @GET
@@ -94,17 +103,25 @@ public class LogViewerResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadFile(@QueryParam("path") String path) {
         if (path == null || path.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Path parameter is required").build();
+            return Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity("Path parameter is required")
+                .build();
         }
         File file = new File(path);
         if (!file.exists() || !file.isFile()) {
-            return Response.status(Response.Status.NOT_FOUND).entity("File not found").build();
+            return Response
+                .status(Response.Status.NOT_FOUND)
+                .entity("File not found").build();
         }
         try {
             return Response.ok(Files.readAllBytes(Paths.get(path)))
-                    .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"").build();
+                .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (IOException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error reading file").build();
+            return Response
+                .status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Error reading file")
+                .build();
         }
     }
 
